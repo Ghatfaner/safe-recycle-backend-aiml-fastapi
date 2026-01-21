@@ -1,10 +1,12 @@
 from typing import Annotated
-from sqlmodel import Field
-from base_model import BaseModel
+from sqlmodel import Field, SQLModel
 
-class User(BaseModel, table=True):
+class User(SQLModel, table=True):
     __tablename__ = "users"
+    
     id: int | None = Field(default=None, primary_key=True)
     name: str = Field(index=True)
     email: str = Field(index=True)
-    password: str
+    
+    hashed_password: str
+    disabled: bool | None = None

@@ -8,3 +8,7 @@ fastapi
 sqlmodel
 pydantic-settings
 pymysql
+
+# OAuth
+pyjwt
+pwdlib
