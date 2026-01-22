@@ -1,22 +1,22 @@
 from datetime import datetime, timedelta, timezone
 from typing import Annotated
 import jwt
-from fastapi import Depends, FastAPI, HTTPException, status
-from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
+from fastapi import Depends, HTTPException, status
+from fastapi.security import OAuth2PasswordBearer
 from jwt.exceptions import InvalidTokenError
-from pwdlib import PasswordHash
 from sqlmodel import Session, select
 
 from app.core.sequrity import get_password_hashed, get_user_by_email, verify_password
 from app.core.config import settings
 from app.databases.session import get_session
 from app.models.user_model import User
+from app.schemas.user_schema import UserCreate
 
 SECRET_KEY = settings.SECRET_KEY
 ALGORITHM = settings.ALGORITHM
 ACCESS_TOKEN_EXPIRE_MINUTES = settings.ACCESS_TOKEN_EXPIRE_MINUTES
 
-oauth2_schema = OAuth2PasswordBearer(tokenUrl="token")
+oauth2_schema = OAuth2PasswordBearer(tokenUrl="/api/auth/token")
     
 def authenticate_user(session: Session, email: str, password: str):
     user = get_user_by_email(session, email)
@@ -69,3 +69,22 @@ async def get_current_active_user(
     if current_user.disabled:
         raise HTTPException(status_code=400, detail="Inactive User")
     return current_user
+
+def create_user(session: Session, user_in: UserCreate) -> User:
+    existing_user = session.exec(
+        select(User).where(User.name == user_in.name)
+    ).first()
+    
+    if existing_user:
+        raise ValueError("Username already exist")
+    
+    user = User(
+        name=user_in.name,
+        email=user_in.email,
+        hashed_password=get_password_hashed(user_in.password)
+    )
+    
+    session.add(user)
+    session.commit()
+    session.refresh(user)
+    return user
