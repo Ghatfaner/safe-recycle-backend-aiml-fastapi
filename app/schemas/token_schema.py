@@ -8,5 +8,5 @@ class Token(BaseModel):
 class TokenData(BaseModel):
     user_id: int
     
-class LogoutRequest(BaseModel):
+class TokenRequest(BaseModel):
     refresh_token: str
