@@ -116,7 +116,7 @@ def create_refresh_token(session: Session, user_id: int) -> str:
     refresh_token = RefreshToken(
         user_id=user_id,
         token_hash=token_hash,
-        expires_at=datetime.utcnow() + timedelta(hours=REFRESH_TOKEN_EXPIRE_HOURS)
+        expires_at=datetime.now(timezone.utc) + timedelta(hours=REFRESH_TOKEN_EXPIRE_HOURS)
     )
     
     session.add(refresh_token)
@@ -137,7 +137,7 @@ def validate_refresh_token(session: Session, token: str) -> RefreshToken | None:
     if not refresh_token:
         return None
     
-    if refresh_token.expires_at < datetime.now():
+    if refresh_token.expires_at.replace(tzinfo=timezone.utc) < datetime.now(timezone.utc):
         return None
     
     return refresh_token

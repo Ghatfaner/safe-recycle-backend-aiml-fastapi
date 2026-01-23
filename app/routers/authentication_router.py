@@ -6,7 +6,7 @@ from sqlmodel import Session
 
 from app.databases.session import get_session
 from app.models.user_model import User
-from app.schemas.token_schema import LogoutRequest
+from app.schemas.token_schema import TokenRequest
 from app.schemas.user_schema import UserCreate, UserRead
 from app.services.authentication_service import authenticate_user, create_access_token, create_user, get_current_active_user, create_refresh_token, logout_user, revoke_refresh_token, validate_refresh_token
 from app.schemas.token_schema import Token
@@ -71,12 +71,12 @@ def register(user_in: UserCreate, session: Session = Depends(get_session)):
         
 @router.post("/refresh")
 def refresh_access_token(
-    refresh_token_raw: str,
+    data: TokenRequest,
     session: Session = Depends(get_session)
 ):
     try:
         # 1. Validate refresh token
-        refresh_token = validate_refresh_token(session, refresh_token_raw)
+        refresh_token = validate_refresh_token(session, data.refresh_token)
         if not refresh_token:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
@@ -110,7 +110,7 @@ def refresh_access_token(
         
 @router.post("/logout")
 def logout(
-    data: LogoutRequest,
+    data: TokenRequest,
     authorization: str = Header(...),
     session: Session = Depends(get_session)
 ):
