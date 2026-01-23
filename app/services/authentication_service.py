@@ -155,9 +155,11 @@ def logout_user(session: Session, token: str):
     jti = payload.get("jti")
     exp = payload.get("exp")
     
+    expired = datetime.fromtimestamp(exp, tz=timezone.utc)
+    
     blacklist = TokenBlockedList(
         jti=jti,
-        expired_at=exp
+        expired_at=expired
     )
         
     session.add(blacklist)    

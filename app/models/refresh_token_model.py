@@ -17,4 +17,4 @@ class RefreshToken(SQLModel, table=True):
     
     created_at: datetime = Field(default_factory=datetime.utcnow)
     
-    user: "User" = Relationship(back_populates="users")
+    user: "User" = Relationship(back_populates="refresh_token")

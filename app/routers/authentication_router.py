@@ -8,8 +8,8 @@ from app.databases.session import get_session
 from app.models.user_model import User
 from app.schemas.token_schema import LogoutRequest
 from app.schemas.user_schema import UserCreate, UserRead
-from app.services.authentication_service import authenticate_user, create_access_token, create_user, get_current_active_user, create_refresh_token, logout_user, revoke_refresh_token
-from app.models.jwt_model import Token
+from app.services.authentication_service import authenticate_user, create_access_token, create_user, get_current_active_user, create_refresh_token, logout_user, revoke_refresh_token, validate_refresh_token
+from app.schemas.token_schema import Token
 from app.core.config import settings
 
 SECRET_KEY = settings.SECRET_KEY
@@ -76,6 +76,9 @@ def logout(
     session: Session = Depends(get_session)
 ):
     token = authorization.replace("Bearer ", "")
-    logout_user(token, session)
-    revoke_refresh_token(session, data.refresh_token)
+    logout_user(session, token)
+    refresh = validate_refresh_token(session=session, token=data.refresh_token)
+    
+    if refresh:
+        revoke_refresh_token(session, refresh)
     return {"message": "Logout successful"}
