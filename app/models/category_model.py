@@ -13,6 +13,4 @@ class Category(SQLModel, table=True):
     image_link: str
     
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
-    updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
-    
-    item: List[Item] = Relationship(back_populates="category")
+    updated_at: datetime | None = None
