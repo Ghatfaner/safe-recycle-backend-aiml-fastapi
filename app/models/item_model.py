@@ -10,7 +10,7 @@ class Item(SQLModel, table=True):
     
     id: int | None = Field(default=None, primary_key=True, index=True)
     name: str = Field(index=True)
-    descriptions: str 
+    description: str 
     image_link: str
     recycle: str
     
