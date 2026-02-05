@@ -109,8 +109,6 @@ def update_category_endpoint(
         
         return updated
     except Exception as e:
-        raise
-    except Exception as e:
         raise HTTPException(400, str(e))
     
 @router.delete("/{id}")

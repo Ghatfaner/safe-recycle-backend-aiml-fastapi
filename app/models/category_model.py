@@ -14,3 +14,5 @@ class Category(SQLModel, table=True):
     
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     updated_at: datetime | None = None
+    
+    item: List["Item"] = Relationship(back_populates="category")

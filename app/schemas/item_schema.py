@@ -1,5 +1,6 @@
+from typing import List
 from pydantic import BaseModel
-from datetime import datetime
+from datetime import datetime, timezone
 
 from app.schemas.category_schema import ReadCategory
 
@@ -32,14 +33,25 @@ class ReadItem(BaseModel):
         "from_attributes": True
     }
     
-class UpdateItem(BaseModel):
+class ShowItem(BaseModel):
+    id: int
     name: str
-    description: str
     image_link: str
-    recycle: str
+
+class ItemListResponse(BaseModel):
+    status: str
+    data: List[ShowItem]
     
-    is_reusable: bool
-    is_recyclable: bool
-    is_hazardous: bool
+class UpdateItem(BaseModel):
+    name: str | None
+    description: str | None
+    image_link: str | None
+    recycle: str | None
     
-    updated_at: datetime
+    is_reusable: bool | None
+    is_recyclable: bool | None
+    is_hazardous: bool | None
+    
+    category_name: str | None
+    
+    updated_at: datetime = datetime.now(timezone.utc)
