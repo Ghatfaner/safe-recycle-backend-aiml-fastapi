@@ -1,5 +1,5 @@
-from fastapi import APIRouter, Depends, HTTPException, status
-from typing import Annotated
+from fastapi import APIRouter, File, UploadFile, Depends, HTTPException, Form
+from typing import Annotated, List
 from sqlmodel import Session, select
 
 from dotenv import load_dotenv
@@ -10,24 +10,29 @@ from app.services.llm_service import process_llm_request
 from app.core.config import settings
 
 
-GEMINI_API_KEY = settings.GEMINI_API_KEY
-GEMINI_MODEL_NAME = settings.GEMINI_MODEL_NAME
-
-
 router = APIRouter(prefix="/llm", tags=["LLM"])
 
 
 @router.post("/process", response_model=LLMRequest)
 async def llm_process_request(
-    llm_request: LLMRequest,
-    session: Annotated[Session, Depends(get_session)]
+
+    model_name: Annotated[str, Form(...)],
+    file: Annotated[UploadFile, File(...)],
+    prompt: Annotated[str, Form(...)],
+    session: Session = Depends(get_session)
 ):
     try:
-        process_llm_request(llm_request)
-        return llm_request
+        result_model = await process_llm_request(
+            model_name=model_name,
+            prompt=prompt,
+            upload_file=file,
+            session=session
+        )
+
+        return result_model
+
     except Exception as e:
         raise HTTPException(
-            status_code = status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail = f"An error occured while processing the LLM request: {str(e)}"
+            status_code=422,
+            detail=f"Validation Error: {str(e)}"
         )
-        

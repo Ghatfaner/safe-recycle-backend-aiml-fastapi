@@ -5,6 +5,10 @@ pyjwt
 fastapi
 python-multipart
 
+# LLM
+google-auth
+google-genai
+
 # Database
 sqlmodel
 pydantic-settings
