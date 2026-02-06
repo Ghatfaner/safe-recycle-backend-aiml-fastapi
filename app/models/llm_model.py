@@ -1,6 +1,6 @@
 from sqlmodel import Field, SQLModel
 
-class LLM_Model(SQLModel, table=True):
+class LLMModel(SQLModel, table=True):
     __tablename__ = "items"
 
     id: int | None = Field(default=None, primary_key=True)

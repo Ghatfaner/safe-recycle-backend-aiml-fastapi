@@ -3,6 +3,7 @@ from google.genai import types
 
 import requests
 from app.schemas.llm_schema import LLMRequest
+from app.models.llm_model import LLMModel
 
 
 def process_llm_request(llm_request: LLMRequest):
@@ -10,7 +11,7 @@ def process_llm_request(llm_request: LLMRequest):
     image_path = "app/OIP.jpg"
     image_bytes = requests.get(image_path).content
     image = types.Part.from_bytes(
-        data = image_bytes, mime_type="image/jpg/jpeg"
+        data=image_bytes, mime_type="image/jpg/jpeg"
     )
 
     llm_request.model_name = "gemini-1.5-pro"
