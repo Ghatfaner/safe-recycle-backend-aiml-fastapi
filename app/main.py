@@ -1,6 +1,7 @@
 from fastapi import FastAPI, Depends, Request, HTTPException
 from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
+from contextlib import asynccontextmanager
 from typing import Annotated
 from sqlmodel import Session
 from pathlib import Path
