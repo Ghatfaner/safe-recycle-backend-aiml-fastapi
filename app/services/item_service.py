@@ -1,4 +1,4 @@
-from sqlmodel import Session, select
+from sqlmodel import Session, func, select
 from typing import Optional, List
 from datetime import datetime, timezone 
 
@@ -45,7 +45,13 @@ def read_item(session: Session, id: int) -> ReadItem | None:
     
     return item
 
-def show_item(session: Session, name: Optional[str] = None, category: Optional[int] = None):
+def show_item(
+    session: Session, 
+    limit: int,
+    offset: int,
+    name: Optional[str] = None, 
+    category: Optional[int] = None,
+):
     statement = select(Item)
     
     if name:
@@ -58,7 +64,15 @@ def show_item(session: Session, name: Optional[str] = None, category: Optional[i
             Item.category_id == category
         )
         
-    return session.exec(statement).all()
+    total = session.exec(
+        select(func.count()).select_from(statement.subquery())
+    ).one()
+    
+    items = session.exec(
+        statement.offset(offset).limit(limit)
+    )
+    
+    return items, total
 
 def update_item(session: Session, id: int, data: UpdateItem):
     existing = session.exec(

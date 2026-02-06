@@ -3,9 +3,10 @@ from sqlmodel import Session
 from typing import List, Optional
 from fastapi import APIRouter, Depends, HTTPException, Query, UploadFile, File, Form
 from pathlib import Path
+import math 
 
 from app.services.item_service import read_item, create_item, show_item, update_item, delete_item
-from app.schemas.item_schema import ItemListResponse, ReadItem, CreateItem, UpdateItem
+from app.schemas.item_schema import ItemListResponse, ReadItem, CreateItem, UpdateItem, SingleItemResponse
 from app.databases.session import get_session
 
 BASE_STORAGE = Path("storage/image/items")
@@ -13,7 +14,7 @@ BASE_STORAGE.mkdir(parents=True, exist_ok=True)
 
 router = APIRouter(prefix="/items", tags=["item"])
 
-@router.post("/", response_model=ReadItem, status_code=201)
+@router.post("/", response_model=SingleItemResponse, status_code=201)
 def create_item_endpoint(
     name: str = Form(...),
     description: str = Form(...),
@@ -49,13 +50,30 @@ def create_item_endpoint(
             )
         )
         
-        return item
+        return {
+            "status": "Success",
+            "message": "Item succefully created",
+            "data": item
+        }
     except Exception as e:
         print(str(e))
         raise HTTPException(
             status_code=400,
             detail=str(e)
         )
+        
+@router.get("/{id}", response_model=SingleItemResponse)
+def read_item_endpoint(id: int, session: Session = Depends(get_session)):
+    item = read_item(session=session, id=id)
+    
+    if item is None:
+        raise HTTPException(404, f"Item {id} doesn't exists")
+    
+    return {
+        "status": "Success",
+        "message": "Item succesfully retrieved",
+        "data": item
+    }
         
 @router.get("/", response_model=ItemListResponse)
 def show_items_endpoint(
@@ -67,16 +85,34 @@ def show_items_endpoint(
         default=None,
         description="Search item by category_id"
     ),
+    page: int = Query(1, ge=1),
+    limit: int = Query(10, ge=1, le=100),
     session: Session = Depends(get_session)
 ):
-    items = show_item(session=session, name=name, category=category)
+    offset = (page - 1) * limit
+    
+    items, total = show_item(
+        session=session, 
+        name=name, 
+        category=category,
+        limit=limit,
+        offset=offset
+    )
+    
+    total_pages = math.ceil(total / limit)
     
     return {
         "status": "success",
-        "data": items
+        "data": items,
+        "meta": {
+            "page": page,
+            "limit": limit,
+            "total_items": total,
+            "total_pages": total_pages
+        }
     }
 
-@router.patch("/{id}", response_model=ReadItem)
+@router.patch("/{id}", response_model=SingleItemResponse)
 def update_item_endpoint(
     id: int,
     name: str | None = Form(None),
@@ -134,6 +170,12 @@ def update_item_endpoint(
         
         if not updated:
             raise HTTPException(404, "Item not found")
+        
+        return {
+            "status": "Success",
+            "message": "Item succefully updated",
+            "data": updated
+        }
         
     except Exception as e:
         raise HTTPException(400, str(e))

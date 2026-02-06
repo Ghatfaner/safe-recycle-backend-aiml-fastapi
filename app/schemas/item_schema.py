@@ -3,6 +3,8 @@ from pydantic import BaseModel
 from datetime import datetime, timezone
 
 from app.schemas.category_schema import ReadCategory
+from app.schemas.pagination_schema import PaginationMeta
+from app.schemas.base_response_schema import BaseResponse
 
 class CreateItem(BaseModel):
     name: str
@@ -15,7 +17,7 @@ class CreateItem(BaseModel):
     is_hazardous: bool
     
     category_name: str
-    
+
 class ReadItem(BaseModel):
     id: int
     name: str
@@ -33,6 +35,9 @@ class ReadItem(BaseModel):
         "from_attributes": True
     }
     
+class SingleItemResponse(BaseResponse):
+    data: ReadItem
+    
 class ShowItem(BaseModel):
     id: int
     name: str
@@ -41,6 +46,7 @@ class ShowItem(BaseModel):
 class ItemListResponse(BaseModel):
     status: str
     data: List[ShowItem]
+    meta: PaginationMeta
     
 class UpdateItem(BaseModel):
     name: str | None

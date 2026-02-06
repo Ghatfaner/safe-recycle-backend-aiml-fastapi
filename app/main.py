@@ -1,4 +1,5 @@
-from fastapi import FastAPI, Depends
+from fastapi import FastAPI, Depends, Request, HTTPException
+from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
 from typing import Annotated
 from sqlmodel import Session
@@ -19,3 +20,14 @@ app = FastAPI()
 app.include_router(auth_router, prefix="/api")
 app.include_router(category_router, prefix="/api")
 app.include_router(item_router, prefix="/api")
+
+@app.exception_handler(HTTPException)
+async def http_exception_handler(request: Request, exc: HTTPException):
+    return JSONResponse(
+        status_code=exc.status_code,
+        content={
+            "status": "failed",
+            "message": exc.detail
+        }
+    )
+    
