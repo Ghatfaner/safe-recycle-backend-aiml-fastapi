@@ -15,7 +15,7 @@ from app.models.item_model import Item
 from app.models.category_model import Category
 
 #---------------------------------------------------------------#
-#--------------------- LLM REQUEST FUNCTION ----------------------#
+#-------------------- LLM REQUEST FUNCTION ---------------------#
 #---------------------------------------------------------------#
 async def process_llm_request(upload_file: UploadFile, session: Session) -> str:
 
@@ -61,9 +61,11 @@ async def process_llm_request(upload_file: UploadFile, session: Session) -> str:
                 }
 
                 Example: 
-                {"name": "plastic bottle", "description": "A clear plastic water bottle", "recycle": "Rinse and place in plastic bin.", "is_reusable": true, "is_recyclable": true, "is_hazardous": false, "category_id": 2}
+                {"name": "plastic bottle", "description": "A clear plastic water bottle", "recycle": "Rinse and place in plastic bin. Otherwise, you can reuse it by creating a DIY things, etc", "is_reusable": true, "is_recyclable": true, "is_hazardous": false, "category_id": 2}
                 
-                No markdown, no extra text.
+                For "recycle" field provide specific recycling instructions for the item. in Markdown format.
+
+                And the others is: No markdown, no extra text.
                 """
             ]
         )
