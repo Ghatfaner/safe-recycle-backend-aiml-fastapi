@@ -1,9 +1,11 @@
 from sqlmodel import Session
-from typing import Optional
+from typing import Optional, Annotated
 import math
 from fastapi import APIRouter, Depends, HTTPException, Query
 
 from app.services.user_service import show_user, update_user, delete_user
+from app.services.authentication_service import get_current_active_user
+from app.models.user_model import User
 from app.schemas.user_schema import SingleUserResponse, UserUpdate, SingleUserDeleteResponse, UserListResponse
 from app.databases.session import get_session
 
@@ -45,10 +47,14 @@ def show_user_endpoint(
 @router.patch("/{id}", response_model=SingleUserResponse)
 def update_user_endpoint(
     id: int,
+    current_user: Annotated[User, Depends(get_current_active_user)],
     data: UserUpdate,
     session: Session =  Depends(get_session)
 ):
     try:
+        if current_user.id != id:
+            raise HTTPException(403, "You are not allowed to update this user")
+        
         updated = update_user(
             session=session,
             id=id,
@@ -78,9 +84,13 @@ def update_user_endpoint(
 @router.patch("/delete-soft/{id}", response_model=SingleUserDeleteResponse)
 def delete_user_endpoint(
     id: int,
+    current_user: Annotated[User, Depends(get_current_active_user)],
     session: Session = Depends(get_session)
 ):
     try:
+        if current_user.id != id:
+            raise HTTPException(403, "You are not allowed to update this user")
+            
         deleted = delete_user(session=session, id=id)
         
         return {
