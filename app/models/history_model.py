@@ -7,12 +7,12 @@ if TYPE_CHECKING:
     from app.models.item_model import Item
     
 class History(SQLModel, table=True):
-    __tablename__ = "history"
+    __tablename__ = "histories"
     
     id: int | None = Field(default=None, primary_key=True) 
     
-    user_id: int | None = Field(foreign_key="user.id", index=True)
-    item_id: int | None = Field(foreign_key="item.id", index=True)
+    user_id: int | None = Field(foreign_key="users.id", index=True)
+    item_id: int | None = Field(foreign_key="items.id", index=True)
     
     viewed_at: datetime = Field(default_factory=datetime.now(timezone.utc))
 
