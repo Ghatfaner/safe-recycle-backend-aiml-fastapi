@@ -8,8 +8,10 @@ class CreateHistory(BaseModel):
     item_id: int
 
 class Recommendations(BaseModel):
-    item_id = int
-    item_name = str    
+    item_id: int
+    item_name: str
+    item_category: str
+    item_image_link: str    
     
 class ResponseRecommendations(BaseResponse):
-    data = List[Recommendations]
+    data: List[Recommendations]
