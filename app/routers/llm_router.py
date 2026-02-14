@@ -1,33 +1,56 @@
-from fastapi import APIRouter, Depends, HTTPException, status
-from typing import Annotated
+from fastapi import APIRouter, File, UploadFile, Depends, HTTPException, Form
+from typing import Annotated, List
 from sqlmodel import Session, select
 
 from dotenv import load_dotenv
 
 from app.databases.session import get_session
-from app.schemas.llm_schema import LLMRequest
-from app.services.llm_service import process_llm_request
+from app.schemas.llm_schema import LLMRequest, LLMResponse
+from app.services.llm_service import process_llm_request, llm_check_request
 from app.core.config import settings
-
-
-GEMINI_API_KEY = settings.GEMINI_API_KEY
-GEMINI_MODEL_NAME = settings.GEMINI_MODEL_NAME
 
 
 router = APIRouter(prefix="/llm", tags=["LLM"])
 
 
-@router.post("/process", response_model=LLMRequest)
+@router.post("/process", response_model=LLMResponse)
 async def llm_process_request(
-    llm_request: LLMRequest,
-    session: Annotated[Session, Depends(get_session)]
+    file: Annotated[UploadFile, File(...)],
+    session: Session = Depends(get_session)
 ):
     try:
-        process_llm_request(llm_request)
-        return llm_request
-    except Exception as e:
-        raise HTTPException(
-            status_code = status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail = f"An error occured while processing the LLM request: {str(e)}"
+        process_result = await process_llm_request(
+            upload_file=file,
+            session=session
         )
         
+        return {
+            "output_message": process_result
+        }
+
+    except Exception as e:
+        raise HTTPException(
+            status_code=422,
+            detail=f"Validation Error: {str(e)}"
+        )
+    
+@router.post("/check", response_model=LLMResponse)
+async def llm_check(
+    file: Annotated[UploadFile, File(...)],
+    session: Session = Depends(get_session)
+):
+    try:
+        check_result = await llm_check_request(
+            upload_file=file,
+            session=session
+        )
+        
+        return {
+            "output_message": check_result
+        }
+
+    except Exception as e:
+        raise HTTPException(
+            status_code=422,
+            detail=f"Validation Error: {str(e)}"
+        )
