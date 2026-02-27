@@ -41,7 +41,7 @@ def popular_items(
     limit: int = Query(10, ge=1, le=100)
 ):
     try:
-        offset = (page - 1) * size
+        offset = (page - 1) * limit
 
         items = get_popular_items(
             session,
