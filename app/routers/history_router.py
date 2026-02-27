@@ -38,14 +38,14 @@ def popular_items(
     session: Session = Depends(get_session),
     current_user: User = Depends(get_current_active_user),
     page: int = Query(1, ge=1),
-    size: int = Query(10, ge=1, le=100)
+    limit: int = Query(10, ge=1, le=100)
 ):
     try:
         offset = (page - 1) * size
 
         items = get_popular_items(
             session,
-            limit=size,
+            limit=limit,
             offset=offset
         )
 
