@@ -39,36 +39,39 @@ async def process_llm_request(upload_file: UploadFile, session: Session) -> str:
                 Identify the item in this image. Response ONLY with a valid JSON object.
                 
                 Follow this category_id mapping: 
-                [
-                    {"id": 1, "name": "Organic"}, {"id": 2, "name": "Plastic"}, 
-                    {"id": 3, "name": "Metal"}, {"id": 4, "name": "Glass"}, 
-                    {"id": 5, "name": "Paper"}, {"id": 6, "name": "Textiles"}, 
-                    {"id": 7, "name": "Hazardous"}, {"id": 8, "name": "E-Waste"}, 
-                    {"id": 9, "name": "Batteries"}, {"id": 10, "name": "Styrofoam"}, 
-                    {"id": 11, "name": "Mixed Waste"}, {"id": 12, "name": "Other"}
-                ]
+                [{"id": 1, "name": "Organic"}, {"id": 2, "name": "Plastic"},
+                {"id": 3, "name": "Metal"}, {"id": 4, "name": "Glass"},
+                {"id": 5, "name": "Paper"}, {"id": 6, "name": "Textiles"},
+                {"id": 7, "name": "Hazardous"}, {"id": 8, "name": "E-Waste"},
+                {"id": 9, "name": "Batteries"}, {"id": 10, "name": "Styrofoam"},
+                {"id": 11, "name": "Mixed Waste"}, {"id": 12, "name": "Other"}]
 
-                Response output format: 
+                Response output format:
                 {
-                    "name": "item_name_singular", 
-                    "description": "item_description", 
-                    "recycle": "item_recycle_instructions", 
-                    "is_reusable": true, 
-                    "is_recyclable": true, 
-                    "is_hazardous": false, 
-                    "category_id": 12
+                "name": "item_name_singular",
+                "description": "item_description",
+                "recycle": "item_recycle_instructions",
+                "is_reusable": true,
+                "is_recyclable": true,
+                "is_hazardous": false,
+                "category_id": 12
                 }
-                
 
-                If the item was not a trash item or could not be identified, return name as "Wasted Not Identified".
+                Strict Formatting Rules:
 
-                Example for identified trash item: 
-                {"name": "plastic bottle", "description": "A clear plastic water bottle", "recycle": "**First choice** Before throwing it, see if it can be reused as DIY thing. Easy reuse ideas: - Refill for water\n - Use as a plant watering can\n - Cut and use as a funnel\n\n **How to recycle properly** Most plastic bottle are reusable, especially those marked with PET, PPE, or #1\n Steps:\n - Empty the bottle completely\n - Remove the cap and label\n - Rinse the bottle\n - Place it in the recycling bin", "is_reusable": true, "is_recyclable": true, "is_hazardous": false, "category_id": 2}
+                The value for the "recycle" key MUST be a string containing valid Markdown syntax (e.g., ### for headers, ** for bolding, and - or 1. for lists) to ensure the tips are structured.
+
+                You MUST escape all newline characters as \n within the "recycle" string literal to maintain strict JSON validity. Do not output literal line breaks inside the string.
+
+                The final output must be pure, parsable JSON. Do NOT wrap the output in Markdown code blocks (e.g., omit the json and  tags). Do not append any conversational text.
+
+                If the item is not a recognized waste item or cannot be identified, return the name as "Wasted Not Identified".
+
+                Example for identified trash item:
+                {"name": "plastic bottle", "description": "A clear plastic water bottle", "recycle": "### First choice\nBefore throwing it, see if it can be reused as a DIY project. Easy reuse ideas:\n- Refill for water\n- Use as a plant watering can\n- Cut and use as a funnel\n\n### How to recycle properly\nMost plastic bottles are reusable, especially those marked with PET, PPE, or #1.\nSteps:\n1. Empty the bottle completely\n2. Remove the cap and label\n3. Rinse the bottle\n4. Place it in the recycling bin", "is_reusable": true, "is_recyclable": true, "is_hazardous": false, "category_id": 2}
 
                 Example for non-trash item:
                 {"name": "Wasted Not Identified", "description": "Item could not be identified as trash", "recycle": "N/A", "is_reusable": false, "is_recyclable": false, "is_hazardous": false, "category_id": 12}
-                
-                No markdown, no extra text.
                 """
             ]
         )
