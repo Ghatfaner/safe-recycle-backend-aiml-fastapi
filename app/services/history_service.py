@@ -97,7 +97,11 @@ def get_recommendations(session: Session, user_id: int) -> List | None:
         
     return recommendations
 
-def get_popular_items(session: Session):
+def get_popular_items(
+        session: Session,
+        limit: int,
+        offset: int
+):
     
     seven_days_history = datetime.now(timezone.utc) - timedelta(days=7)
 
@@ -107,7 +111,8 @@ def get_popular_items(session: Session):
         .where(History.viewed_at >= seven_days_history)
         .group_by(Item.id)
         .order_by(desc("popularity_count"))
-        .limit(10)
+        .offset(offset)
+        .limit(limit)
     )
 
     results = session.exec(statement).all()
